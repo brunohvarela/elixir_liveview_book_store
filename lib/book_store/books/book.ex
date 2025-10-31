@@ -4,16 +4,15 @@ defmodule BookStore.Books.Book do
 
   schema "books" do
     field :title, :string
-    field :user_id, :id
+    belongs_to :user_id, BookStore.Users.User
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(book, attrs, user_scope) do
+  def changeset(book, attrs) do
     book
-    |> cast(attrs, [:title])
-    |> validate_required([:title])
-    |> put_change(:user_id, user_scope.user.id)
+    |> cast(attrs, [:title, :user_id])
+    |> validate_required([:title, :user_id])
   end
 end

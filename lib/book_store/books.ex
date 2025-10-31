@@ -5,43 +5,19 @@ defmodule BookStore.Books do
 
   import Ecto.Query, warn: false
   alias BookStore.Repo
-
   alias BookStore.Books.Book
-  alias BookStore.Users.Scope
-
-  @doc """
-  Subscribes to scoped notifications about any book changes.
-
-  The broadcasted messages match the pattern:
-
-    * {:created, %Book{}}
-    * {:updated, %Book{}}
-    * {:deleted, %Book{}}
-
-  """
-  def subscribe_books(%Scope{} = scope) do
-    key = scope.user.id
-
-    Phoenix.PubSub.subscribe(BookStore.PubSub, "user:#{key}:books")
-  end
-
-  defp broadcast_book(%Scope{} = scope, message) do
-    key = scope.user.id
-
-    Phoenix.PubSub.broadcast(BookStore.PubSub, "user:#{key}:books", message)
-  end
 
   @doc """
   Returns the list of books.
 
   ## Examples
 
-      iex> list_books(scope)
+      iex> list_books
       [%Book{}, ...]
 
   """
-  def list_books(%Scope{} = scope) do
-    Repo.all_by(Book, user_id: scope.user.id)
+  def list_books do
+    Repo.all(Book)
   end
 
   @doc """
@@ -51,15 +27,15 @@ defmodule BookStore.Books do
 
   ## Examples
 
-      iex> get_book!(scope, 123)
+      iex> get_book!(123)
       %Book{}
 
-      iex> get_book!(scope, 456)
+      iex> get_book!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_book!(%Scope{} = scope, id) do
-    Repo.get_by!(Book, id: id, user_id: scope.user.id)
+  def get_book!(id) do
+    Repo.get!(Book, id)
   end
 
   @doc """
@@ -67,21 +43,17 @@ defmodule BookStore.Books do
 
   ## Examples
 
-      iex> create_book(scope, %{field: value})
+      iex> create_book(%{field: value})
       {:ok, %Book{}}
 
-      iex> create_book(scope, %{field: bad_value})
+      iex> create_book(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_book(%Scope{} = scope, attrs) do
-    with {:ok, book = %Book{}} <-
-           %Book{}
-           |> Book.changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_book(scope, {:created, book})
-      {:ok, book}
-    end
+  def create_book(attrs) do
+    %Book{}
+    |> Book.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -89,23 +61,17 @@ defmodule BookStore.Books do
 
   ## Examples
 
-      iex> update_book(scope, book, %{field: new_value})
+      iex> update_book(book, %{field: new_value})
       {:ok, %Book{}}
 
-      iex> update_book(scope, book, %{field: bad_value})
+      iex> update_book(book, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_book(%Scope{} = scope, %Book{} = book, attrs) do
-    true = book.user_id == scope.user.id
-
-    with {:ok, book = %Book{}} <-
-           book
-           |> Book.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_book(scope, {:updated, book})
-      {:ok, book}
-    end
+  def update_book(%Book{} = book, attrs) do
+    book
+    |> Book.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -113,21 +79,15 @@ defmodule BookStore.Books do
 
   ## Examples
 
-      iex> delete_book(scope, book)
+      iex> delete_book(book)
       {:ok, %Book{}}
 
-      iex> delete_book(scope, book)
+      iex> delete_book(book)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_book(%Scope{} = scope, %Book{} = book) do
-    true = book.user_id == scope.user.id
-
-    with {:ok, book = %Book{}} <-
-           Repo.delete(book) do
-      broadcast_book(scope, {:deleted, book})
-      {:ok, book}
-    end
+  def delete_book(%Book{} = book) do
+    Repo.delete(book)
   end
 
   @doc """
@@ -135,13 +95,12 @@ defmodule BookStore.Books do
 
   ## Examples
 
-      iex> change_book(scope, book)
+      iex> change_book(book)
       %Ecto.Changeset{data: %Book{}}
 
   """
-  def change_book(%Scope{} = scope, %Book{} = book, attrs \\ %{}) do
-    true = book.user_id == scope.user.id
-
-    Book.changeset(book, attrs, scope)
+  def change_book(%Book{} = book, attrs \\ %{}) do
+    Book.changeset(book, attrs)
   end
+
 end

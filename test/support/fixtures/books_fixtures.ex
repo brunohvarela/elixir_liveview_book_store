@@ -7,13 +7,13 @@ defmodule BookStore.BooksFixtures do
   @doc """
   Generate a book.
   """
-  def book_fixture(scope, attrs \\ %{}) do
+  def book_fixture(_scope, attrs \\ %{}) do
     attrs =
       Enum.into(attrs, %{
         title: "some title"
       })
 
-    {:ok, book} = BookStore.Books.create_book(scope, attrs)
+    {:ok, book} = BookStore.Books.create_book(attrs)
     book
   end
 end
