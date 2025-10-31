@@ -1,1 +1,4 @@
-<h1>This is the starting point</h1>
+<h1>Book list</h1>
+<div :for={book <- @book_list}>
+    <%= book.title %>
+</div>

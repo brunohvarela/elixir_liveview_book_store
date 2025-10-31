@@ -4,7 +4,7 @@ defmodule BookStore.Books.Book do
 
   schema "books" do
     field :title, :string
-    belongs_to :user_id, BookStore.Users.User
+    belongs_to :user, BookStore.Users.User
 
     timestamps(type: :utc_datetime)
   end
